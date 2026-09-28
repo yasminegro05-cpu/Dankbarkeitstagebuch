@@ -1,0 +1,11 @@
+{
+"name": "Mein Dankbarkeitstagebuch",
+"short_name": "Dankbarkeit",
+"description": "Mein persönliches Dankbarkeitstagebuch",
+"start_url": "./index.html",
+"display": "standalone",
+"background_color": "#f7f7f5",
+"theme_color": "#f7f7f5",
+"lang": "de",
+"orientation": "portrait"
+}

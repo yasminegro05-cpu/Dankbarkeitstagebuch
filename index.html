@@ -1,0 +1,2455 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Mein Dankbarkeitstagebuch</title>
+
+<link rel="manifest" href="./manifest.json">
+<meta name="theme-color" content="#f7f7f5">
+
+<style>
+
+* {
+box-sizing: border-box;
+}
+
+:root {
+--hintergrund: #f7f6f2;
+--karte: #ffffff;
+--text: #30302d;
+--text-hell: #85847e;
+--linie: #e5e3dd;
+--auswahl: #eceae3;
+--akzent: #d8d3c7;
+--gruen: #e5eee3;
+--gruen-text: #53644f;
+--rot: #f2e5e3;
+}
+
+body.dark {
+--hintergrund: #1f201e;
+--karte: #292a27;
+--text: #eeeeea;
+--text-hell: #aaa9a2;
+--linie: #41423e;
+--auswahl: #3a3b37;
+--akzent: #4a4943;
+--gruen: #354235;
+--gruen-text: #c5d5c0;
+--rot: #493534;
+}
+
+body {
+margin: 0;
+padding: 0;
+background: var(--hintergrund);
+color: var(--text);
+font-family:
+-apple-system,
+BlinkMacSystemFont,
+"Segoe UI",
+Arial,
+sans-serif;
+transition: background 0.2s, color 0.2s;
+}
+
+.app {
+max-width: 650px;
+margin: 0 auto;
+padding: 24px 18px 100px;
+}
+
+header {
+text-align: center;
+margin-bottom: 25px;
+}
+
+h1 {
+font-size: 27px;
+font-weight: 500;
+margin: 5px 0 8px;
+}
+
+.datum {
+color: var(--text-hell);
+font-size: 15px;
+}
+
+.seite {
+display: none;
+}
+
+.seite.aktiv {
+display: block;
+}
+
+.karte {
+background: var(--karte);
+border-radius: 20px;
+padding: 21px;
+margin-bottom: 18px;
+border: 1px solid var(--linie);
+}
+
+h2 {
+font-size: 19px;
+font-weight: 500;
+margin: 0 0 15px;
+}
+
+h3 {
+font-size: 16px;
+font-weight: 500;
+}
+
+textarea,
+input[type="text"],
+input[type="password"] {
+width: 100%;
+border: 1px solid var(--linie);
+background: var(--hintergrund);
+color: var(--text);
+border-radius: 14px;
+padding: 14px;
+font-size: 16px;
+font-family: inherit;
+outline: none;
+}
+
+textarea {
+min-height: 115px;
+resize: vertical;
+}
+
+textarea:focus,
+input:focus {
+border-color: var(--text-hell);
+}
+
+.emoji-auswahl {
+display: grid;
+grid-template-columns: repeat(5, 1fr);
+gap: 8px;
+margin-top: 10px;
+}
+
+.emoji {
+border: 2px solid transparent;
+background: var(--hintergrund);
+color: var(--text);
+border-radius: 13px;
+padding: 9px 4px;
+font-size: 26px;
+cursor: pointer;
+}
+
+.emoji.ausgewaehlt {
+border-color: var(--text);
+background: var(--auswahl);
+}
+
+button {
+font-family: inherit;
+}
+
+.haupt-button {
+width: 100%;
+border: none;
+border-radius: 14px;
+padding: 15px;
+background: var(--akzent);
+color: var(--text);
+font-size: 16px;
+cursor: pointer;
+margin-top: 15px;
+}
+
+.haupt-button:active {
+transform: scale(0.99);
+}
+
+.kleiner-button {
+border: 1px solid var(--linie);
+background: var(--karte);
+color: var(--text);
+border-radius: 11px;
+padding: 9px 12px;
+cursor: pointer;
+}
+
+.meldung {
+display: none;
+background: var(--gruen);
+color: var(--gruen-text);
+padding: 12px;
+border-radius: 12px;
+text-align: center;
+margin-top: 12px;
+}
+
+/* Einträge */
+
+.eintrag {
+border-top: 1px solid var(--linie);
+padding: 17px 0;
+}
+
+.eintrag:first-child {
+border-top: none;
+}
+
+.eintrag-text {
+line-height: 1.6;
+white-space: pre-wrap;
+font-size: 16px;
+}
+
+.eintrag-emojis {
+font-size: 23px;
+margin-top: 9px;
+}
+
+.eintrag-aktionen {
+display: flex;
+justify-content: flex-end;
+margin-top: 8px;
+}
+
+.loeschen {
+border: none;
+background: transparent;
+color: var(--text-hell);
+cursor: pointer;
+font-size: 13px;
+}
+
+.leer {
+text-align: center;
+color: var(--text-hell);
+padding: 22px 5px;
+}
+
+/* Kalender */
+
+.kalender-kopf {
+display: flex;
+align-items: center;
+justify-content: space-between;
+margin-bottom: 18px;
+}
+
+.monat-jahr {
+font-size: 19px;
+font-weight: 500;
+}
+
+.monat-button {
+width: 42px;
+height: 42px;
+border: none;
+border-radius: 12px;
+background: var(--auswahl);
+color: var(--text);
+font-size: 25px;
+cursor: pointer;
+}
+
+.wochentage,
+.kalender {
+display: grid;
+grid-template-columns: repeat(7, 1fr);
+gap: 5px;
+}
+
+.wochentage {
+margin-bottom: 5px;
+}
+
+.wochentag {
+text-align: center;
+color: var(--text-hell);
+font-size: 12px;
+padding: 5px 0;
+}
+
+.kalender-tag,
+.leerer-tag {
+min-height: 53px;
+}
+
+.kalender-tag {
+border: none;
+border-radius: 12px;
+background: transparent;
+color: var(--text);
+cursor: pointer;
+font-size: 15px;
+position: relative;
+}
+
+.kalender-tag:hover {
+background: var(--auswahl);
+}
+
+.kalender-tag.heute {
+outline: 2px solid var(--text-hell);
+}
+
+.kalender-tag.hat-eintrag {
+background: var(--gruen);
+font-weight: 600;
+}
+
+.kalender-symbol {
+display: block;
+font-size: 12px;
+margin-top: 2px;
+}
+
+/* Suche */
+
+.suchfeld {
+position: relative;
+}
+
+.suchfeld input {
+padding-right: 45px;
+}
+
+.such-ergebnis {
+border-bottom: 1px solid var(--linie);
+padding: 17px 0;
+cursor: pointer;
+}
+
+.such-ergebnis:last-child {
+border-bottom: none;
+}
+
+.such-datum {
+color: var(--text-hell);
+font-size: 13px;
+margin-bottom: 6px;
+}
+
+/* Einstellungen */
+
+.einstellung {
+display: flex;
+justify-content: space-between;
+align-items: center;
+padding: 15px 0;
+border-bottom: 1px solid var(--linie);
+}
+
+.einstellung:last-child {
+border-bottom: none;
+}
+
+.einstellung-text {
+padding-right: 15px;
+}
+
+.einstellung-titel {
+font-size: 15px;
+}
+
+.einstellung-beschreibung {
+font-size: 13px;
+color: var(--text-hell);
+margin-top: 4px;
+}
+
+.nav {
+position: fixed;
+bottom: 0;
+left: 0;
+right: 0;
+background: var(--karte);
+border-top: 1px solid var(--linie);
+display: flex;
+justify-content: center;
+z-index: 100;
+}
+
+.nav-inner {
+width: 100%;
+max-width: 650px;
+display: grid;
+grid-template-columns: repeat(4, 1fr);
+}
+
+.nav-button {
+border: none;
+background: transparent;
+color: var(--text-hell);
+padding: 11px 3px 13px;
+cursor: pointer;
+font-size: 12px;
+}
+
+.nav-button span {
+display: block;
+font-size: 21px;
+margin-bottom: 3px;
+}
+
+.nav-button.aktiv {
+color: var(--text);
+font-weight: 600;
+}
+
+/* Modal */
+
+.modal-hintergrund {
+display: none;
+position: fixed;
+inset: 0;
+background: rgba(0,0,0,0.45);
+z-index: 200;
+align-items: center;
+justify-content: center;
+padding: 20px;
+}
+
+.modal-hintergrund.aktiv {
+display: flex;
+}
+
+.modal {
+background: var(--karte);
+color: var(--text);
+border-radius: 20px;
+padding: 24px;
+width: 100%;
+max-width: 420px;
+}
+
+.modal h2 {
+margin-bottom: 10px;
+}
+
+.modal-text {
+color: var(--text-hell);
+font-size: 14px;
+line-height: 1.5;
+margin-bottom: 16px;
+}
+
+.modal-aktionen {
+display: flex;
+gap: 10px;
+margin-top: 12px;
+}
+
+.modal-aktionen button {
+flex: 1;
+}
+
+.fehler {
+color: #a55;
+font-size: 14px;
+margin-top: 10px;
+display: none;
+}
+
+/* Sperrbildschirm */
+
+#sperrbildschirm {
+display: none;
+position: fixed;
+inset: 0;
+background: var(--hintergrund);
+color: var(--text);
+z-index: 500;
+align-items: center;
+justify-content: center;
+padding: 25px;
+}
+
+#sperrbildschirm.aktiv {
+display: flex;
+}
+
+.sperrbox {
+width: 100%;
+max-width: 360px;
+text-align: center;
+}
+
+.sperrbox .symbol {
+font-size: 50px;
+margin-bottom: 10px;
+}
+
+.sperrbox input {
+text-align: center;
+letter-spacing: 7px;
+margin-top: 15px;
+}
+
+/* Responsive */
+
+@media (max-width: 420px) {
+
+.app {
+padding-left: 13px;
+padding-right: 13px;
+}
+
+h1 {
+font-size: 24px;
+}
+
+.karte {
+padding: 17px;
+}
+
+.emoji {
+font-size: 24px;
+}
+
+}
+
+</style>
+</head>
+
+
+<body>
+
+<div class="app">
+
+<header>
+
+<h1>🌱 Mein Dankbarkeitstagebuch</h1>
+
+<div class="datum" id="heutigesDatum"></div>
+
+</header>
+
+
+<!-- ==================== HEUTE ==================== -->
+
+<section class="seite aktiv" id="seite-heute">
+
+<div class="karte">
+
+<h2>Heute bin ich dankbar/stolz, dass …</h2>
+
+<textarea
+id="eintragText"
+placeholder="Was möchtest du heute festhalten?"
+></textarea>
+
+
+<h2 style="margin-top: 22px;">
+Wie fühlst du dich heute?
+</h2>
+
+<div class="emoji-auswahl">
+
+<button type="button" class="emoji">😍</button>
+<button type="button" class="emoji">🥰</button>
+<button type="button" class="emoji">😊</button>
+<button type="button" class="emoji">😌</button>
+<button type="button" class="emoji">🤗</button>
+<button type="button" class="emoji">😐</button>
+<button type="button" class="emoji">😔</button>
+<button type="button" class="emoji">😢</button>
+<button type="button" class="emoji">😤</button>
+<button type="button" class="emoji">😴</button>
+
+</div>
+
+
+<button
+class="haupt-button"
+onclick="eintragSpeichern()"
+>
+＋ Eintrag hinzufügen
+</button>
+
+
+<div
+class="meldung"
+id="speicherMeldung"
+>
+Eintrag gespeichert. 🌱
+</div>
+
+</div>
+
+
+<div class="karte">
+
+<h2>Meine heutigen Einträge</h2>
+
+<div id="heutigeEintraege"></div>
+
+</div>
+
+</section>
+
+
+<!-- ==================== KALENDER ==================== -->
+
+<section class="seite" id="seite-kalender">
+
+<div class="karte">
+
+<h2>📅 Kalender</h2>
+
+<div class="kalender-kopf">
+
+<button
+class="monat-button"
+onclick="monatAendern(-1)"
+>
+‹
+</button>
+
+<div
+class="monat-jahr"
+id="monatJahr"
+></div>
+
+<button
+class="monat-button"
+onclick="monatAendern(1)"
+>
+›
+</button>
+
+</div>
+
+
+<div class="wochentage">
+
+<div class="wochentag">Mo</div>
+<div class="wochentag">Di</div>
+<div class="wochentag">Mi</div>
+<div class="wochentag">Do</div>
+<div class="wochentag">Fr</div>
+<div class="wochentag">Sa</div>
+<div class="wochentag">So</div>
+
+</div>
+
+
+<div
+class="kalender"
+id="kalender"
+></div>
+
+</div>
+
+
+<div class="karte">
+
+<h2 id="kalenderAuswahlTitel">
+Einträge
+</h2>
+
+<div id="kalenderEintraege"></div>
+
+</div>
+
+</section>
+
+
+<!-- ==================== SUCHE ==================== -->
+
+<section class="seite" id="seite-suche">
+
+<div class="karte">
+
+<h2>🔎 Suche</h2>
+
+<input
+type="text"
+id="suchfeld"
+placeholder="Suche in deinen Einträgen …"
+oninput="sucheEintraege()"
+>
+
+</div>
+
+
+<div class="karte">
+
+<div id="suchErgebnisse">
+
+<div class="leer">
+Gib einen Begriff ein, um deine Einträge zu durchsuchen.
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+
+<!-- ==================== EINSTELLUNGEN ==================== -->
+
+<section class="seite" id="seite-einstellungen">
+
+<div class="karte">
+
+<h2>⚙️ Einstellungen</h2>
+
+
+<div class="einstellung">
+
+<div class="einstellung-text">
+
+<div class="einstellung-titel">
+🌙 Dunkles Design
+</div>
+
+<div class="einstellung-beschreibung">
+Schont die Augen bei wenig Licht.
+</div>
+
+</div>
+
+<button
+class="kleiner-button"
+onclick="darkModeUmschalten()"
+id="darkModeButton"
+>
+Aus
+</button>
+
+</div>
+
+
+<div class="einstellung">
+
+<div class="einstellung-text">
+
+<div class="einstellung-titel">
+🔒 PIN-Sperre
+</div>
+
+<div class="einstellung-beschreibung">
+Schützt den Zugang zur App.
+</div>
+
+</div>
+
+<button
+class="kleiner-button"
+onclick="pinEinstellungen()"
+id="pinButton"
+>
+Einrichten
+</button>
+
+</div>
+
+
+<div class="einstellung">
+
+<div class="einstellung-text">
+
+<div class="einstellung-titel">
+📦 Backup erstellen
+</div>
+
+<div class="einstellung-beschreibung">
+Speichert deine Einträge als Datei.
+</div>
+
+</div>
+
+<button
+class="kleiner-button"
+onclick="backupErstellen()"
+>
+Export
+</button>
+
+</div>
+
+
+<div class="einstellung">
+
+<div class="einstellung-text">
+
+<div class="einstellung-titel">
+📥 Backup wiederherstellen
+</div>
+
+<div class="einstellung-beschreibung">
+Lädt ein zuvor erstelltes Backup.
+</div>
+
+</div>
+
+<button
+class="kleiner-button"
+onclick="backupImportOeffnen()"
+>
+Import
+</button>
+
+<input
+type="file"
+id="backupDatei"
+accept=".json"
+style="display:none"
+onchange="backupImportieren(event)"
+>
+
+</div>
+
+</div>
+
+
+<div class="karte">
+
+<h2>Datenschutz</h2>
+
+<p style="line-height:1.6; color:var(--text-hell);">
+Deine Tagebucheinträge werden in dieser Version
+lokal im Browser auf deinem Gerät gespeichert.
+Es wird kein Server für die Speicherung verwendet.
+</p>
+
+<p style="line-height:1.6; color:var(--text-hell);">
+Wichtig: Die aktuelle PIN-Sperre schützt den Zugang
+zur Benutzeroberfläche. Die gespeicherten Daten selbst
+sind noch nicht verschlüsselt.
+</p>
+
+</div>
+
+</section>
+
+</div>
+
+
+<!-- ==================== NAVIGATION ==================== -->
+
+<nav class="nav">
+
+<div class="nav-inner">
+
+<button
+class="nav-button aktiv"
+onclick="seiteWechseln('heute', this)"
+>
+<span>🏠</span>
+Heute
+</button>
+
+
+<button
+class="nav-button"
+onclick="seiteWechseln('kalender', this)"
+>
+<span>📅</span>
+Kalender
+</button>
+
+
+<button
+class="nav-button"
+onclick="seiteWechseln('suche', this)"
+>
+<span>🔎</span>
+Suche
+</button>
+
+
+<button
+class="nav-button"
+onclick="seiteWechseln('einstellungen', this)"
+>
+<span>⚙️</span>
+Einstellungen
+</button>
+
+</div>
+
+</nav>
+
+
+<!-- ==================== PIN MODAL ==================== -->
+
+<div
+class="modal-hintergrund"
+id="pinModal"
+>
+
+<div class="modal">
+
+<h2>🔒 PIN-Sperre</h2>
+
+<div class="modal-text">
+Lege eine vierstellige PIN fest.
+Vergiss sie nicht – es gibt in dieser ersten
+Version noch keine Wiederherstellungsmöglichkeit.
+</div>
+
+<input
+type="password"
+id="neuePin"
+inputmode="numeric"
+maxlength="4"
+placeholder="4-stellige PIN"
+>
+
+<div
+class="fehler"
+id="pinFehler"
+>
+Bitte genau vier Zahlen eingeben.
+</div>
+
+<div class="modal-aktionen">
+
+<button
+class="kleiner-button"
+onclick="pinModalSchliessen()"
+>
+Abbrechen
+</button>
+
+<button
+class="haupt-button"
+style="margin-top:0"
+onclick="pinSpeichern()"
+>
+Speichern
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+
+<!-- ==================== SPERRBILDSCHIRM ==================== -->
+
+<div id="sperrbildschirm">
+
+<div class="sperrbox">
+
+<div class="symbol">🌱</div>
+
+<h2>Mein Dankbarkeitstagebuch</h2>
+
+<p style="color:var(--text-hell)">
+Bitte PIN eingeben.
+</p>
+
+<input
+type="password"
+id="pinEingabe"
+inputmode="numeric"
+maxlength="4"
+placeholder="••••"
+onkeydown="if(event.key === 'Enter') entsperren()"
+>
+
+<button
+class="haupt-button"
+onclick="entsperren()"
+>
+Entsperren
+</button>
+
+<div
+class="fehler"
+id="entsperrFehler"
+>
+Die PIN ist nicht korrekt.
+</div>
+
+</div>
+
+</div>
+
+
+<script>
+
+/* ==================================================
+DATEN
+================================================== */
+
+let alleEintraege =
+JSON.parse(
+localStorage.getItem("dankbarkeitEintraege")
+) || [];
+
+
+let ausgewaehlteEmojis = [];
+
+
+const heute = new Date();
+
+
+let kalenderJahr =
+heute.getFullYear();
+
+
+let kalenderMonat =
+heute.getMonth();
+
+
+let ausgewaehltesDatum =
+datumAlsString(heute);
+
+
+/* ==================================================
+DATUM
+================================================== */
+
+function datumAlsString(datum) {
+
+const jahr =
+datum.getFullYear();
+
+const monat =
+String(
+datum.getMonth() + 1
+).padStart(2, "0");
+
+const tag =
+String(
+datum.getDate()
+).padStart(2, "0");
+
+return (
+jahr +
+"-" +
+monat +
+"-" +
+tag
+);
+
+}
+
+
+function datumAnzeigen(datum) {
+
+return datum.toLocaleDateString(
+"de-DE",
+{
+weekday: "long",
+day: "numeric",
+month: "long",
+year: "numeric"
+}
+);
+
+}
+
+
+document.getElementById(
+"heutigesDatum"
+).textContent =
+datumAnzeigen(heute);
+
+
+/* ==================================================
+SEITEN-NAVIGATION
+================================================== */
+
+function seiteWechseln(
+seite,
+button
+) {
+
+document
+.querySelectorAll(".seite")
+.forEach(
+function(element) {
+
+element.classList.remove(
+"aktiv"
+);
+
+}
+);
+
+
+document
+.getElementById(
+"seite-" + seite
+)
+.classList.add(
+"aktiv"
+);
+
+
+document
+.querySelectorAll(".nav-button")
+.forEach(
+function(element) {
+
+element.classList.remove(
+"aktiv"
+);
+
+}
+);
+
+
+button.classList.add(
+"aktiv"
+);
+
+
+if (seite === "kalender") {
+
+kalenderAnzeigen();
+
+eintraegeAnzeigen(
+ausgewaehltesDatum,
+"kalender"
+);
+
+}
+
+
+if (seite === "suche") {
+
+document
+.getElementById("suchfeld")
+.focus();
+
+}
+
+}
+
+
+/* ==================================================
+EMOJIS
+================================================== */
+
+document
+.querySelectorAll(".emoji")
+.forEach(
+function(emoji) {
+
+emoji.addEventListener(
+"click",
+function() {
+
+const text =
+emoji.textContent;
+
+
+emoji.classList.toggle(
+"ausgewaehlt"
+);
+
+
+if (
+ausgewaehlteEmojis
+.includes(text)
+) {
+
+ausgewaehlteEmojis =
+ausgewaehlteEmojis
+.filter(
+function(e) {
+return e !== text;
+}
+);
+
+} else {
+
+ausgewaehlteEmojis.push(
+text
+);
+
+}
+
+}
+);
+
+}
+);
+
+
+/* ==================================================
+EINTRAG SPEICHERN
+================================================== */
+
+function eintragSpeichern() {
+
+const text =
+document
+.getElementById("eintragText")
+.value
+.trim();
+
+
+if (text === "") {
+
+alert(
+"Bitte schreibe zuerst einen Eintrag."
+);
+
+return;
+
+}
+
+
+const neuerEintrag = {
+
+id: Date.now(),
+
+datum:
+datumAlsString(heute),
+
+text: text,
+
+emojis:
+[...ausgewaehlteEmojis]
+
+};
+
+
+alleEintraege.push(
+neuerEintrag
+);
+
+
+datenSpeichern();
+
+
+document
+.getElementById("eintragText")
+.value = "";
+
+
+ausgewaehlteEmojis = [];
+
+
+document
+.querySelectorAll(".emoji")
+.forEach(
+function(emoji) {
+
+emoji.classList.remove(
+"ausgewaehlt"
+);
+
+}
+);
+
+
+const meldung =
+document.getElementById(
+"speicherMeldung"
+);
+
+
+meldung.style.display =
+"block";
+
+
+setTimeout(
+function() {
+
+meldung.style.display =
+"none";
+
+},
+2200
+);
+
+
+heutigeEintraegeAnzeigen();
+
+kalenderAnzeigen();
+
+}
+
+
+function datenSpeichern() {
+
+localStorage.setItem(
+"dankbarkeitEintraege",
+JSON.stringify(
+alleEintraege
+)
+);
+
+}
+
+
+/* ==================================================
+HEUTIGE EINTRÄGE
+================================================== */
+
+function heutigeEintraegeAnzeigen() {
+
+eintraegeAnzeigen(
+datumAlsString(heute),
+"heute"
+);
+
+}
+
+
+/* ==================================================
+EINTRÄGE ANZEIGEN
+================================================== */
+
+function eintraegeAnzeigen(
+datumString,
+bereich
+) {
+
+const container =
+document.getElementById(
+bereich === "heute"
+? "heutigeEintraege"
+: "kalenderEintraege"
+);
+
+
+const titel =
+document.getElementById(
+"kalenderAuswahlTitel"
+);
+
+
+container.innerHTML = "";
+
+
+const eintraege =
+alleEintraege.filter(
+function(eintrag) {
+
+return (
+eintrag.datum ===
+datumString
+);
+
+}
+);
+
+
+if (bereich === "kalender") {
+
+const teile =
+datumString.split("-");
+
+
+const datum =
+new Date(
+Number(teile[0]),
+Number(teile[1]) - 1,
+Number(teile[2])
+);
+
+
+titel.textContent =
+datumAnzeigen(datum);
+
+}
+
+
+if (eintraege.length === 0) {
+
+container.innerHTML =
+'<div class="leer">Noch keine Einträge für diesen Tag. 🌱</div>';
+
+return;
+
+}
+
+
+eintraege.forEach(
+function(eintrag) {
+
+const box =
+document.createElement(
+"div"
+);
+
+
+box.className =
+"eintrag";
+
+
+const text =
+document.createElement(
+"div"
+);
+
+
+text.className =
+"eintrag-text";
+
+
+text.textContent =
+eintrag.text;
+
+
+box.appendChild(
+text
+);
+
+
+if (
+eintrag.emojis &&
+eintrag.emojis.length > 0
+) {
+
+const emoji =
+document.createElement(
+"div"
+);
+
+
+emoji.className =
+"eintrag-emojis";
+
+
+emoji.textContent =
+eintrag.emojis.join(" ");
+
+
+box.appendChild(
+emoji
+);
+
+}
+
+
+const aktionen =
+document.createElement(
+"div"
+);
+
+
+aktionen.className =
+"eintrag-aktionen";
+
+
+const loeschen =
+document.createElement(
+"button"
+);
+
+
+loeschen.className =
+"loeschen";
+
+
+loeschen.textContent =
+"Eintrag löschen";
+
+
+loeschen.onclick =
+function() {
+
+eintragLoeschen(
+eintrag.id
+);
+
+};
+
+
+aktionen.appendChild(
+loeschen
+);
+
+
+box.appendChild(
+aktionen
+);
+
+
+container.appendChild(
+box
+);
+
+}
+);
+
+}
+
+
+function eintragLoeschen(id) {
+
+const bestaetigung =
+confirm(
+"Möchtest du diesen Eintrag wirklich löschen?"
+);
+
+
+if (!bestaetigung) {
+
+return;
+
+}
+
+
+alleEintraege =
+alleEintraege.filter(
+function(eintrag) {
+
+return (
+eintrag.id !== id
+);
+
+}
+);
+
+
+datenSpeichern();
+
+
+heutigeEintraegeAnzeigen();
+
+kalenderAnzeigen();
+
+
+if (
+document
+.getElementById(
+"seite-kalender"
+)
+.classList.contains("aktiv")
+) {
+
+eintraegeAnzeigen(
+ausgewaehltesDatum,
+"kalender"
+);
+
+}
+
+
+sucheEintraege();
+
+}
+
+
+/* ==================================================
+KALENDER
+================================================== */
+
+function kalenderAnzeigen() {
+
+const kalender =
+document.getElementById(
+"kalender"
+);
+
+
+kalender.innerHTML = "";
+
+
+const datum =
+new Date(
+kalenderJahr,
+kalenderMonat,
+1
+);
+
+
+document.getElementById(
+"monatJahr"
+).textContent =
+datum.toLocaleDateString(
+"de-DE",
+{
+month: "long",
+year: "numeric"
+}
+);
+
+
+/*
+Dieser Trick gibt automatisch die
+richtige Anzahl der Tage zurück:
+
+new Date(Jahr, Monat + 1, 0)
+
+Dadurch funktionieren auch:
+- 28 Tage
+- 29 Tage
+- 30 Tage
+- 31 Tage
+- Schaltjahre
+*/
+
+const anzahlTage =
+new Date(
+kalenderJahr,
+kalenderMonat + 1,
+0
+).getDate();
+
+
+let ersterWochentag =
+new Date(
+kalenderJahr,
+kalenderMonat,
+1
+).getDay();
+
+
+/*
+JavaScript:
+Sonntag = 0
+Montag = 1
+
+Für unseren Kalender:
+Montag = 0
+Sonntag = 6
+*/
+
+if (ersterWochentag === 0) {
+
+ersterWochentag = 6;
+
+} else {
+
+ersterWochentag--;
+
+}
+
+
+for (
+let i = 0;
+i < ersterWochentag;
+i++
+) {
+
+const leer =
+document.createElement(
+"div"
+);
+
+leer.className =
+"leerer-tag";
+
+kalender.appendChild(
+leer
+);
+
+}
+
+
+for (
+let tag = 1;
+tag <= anzahlTage;
+tag++
+) {
+
+const datumDesTages =
+new Date(
+kalenderJahr,
+kalenderMonat,
+tag
+);
+
+
+const datumString =
+datumAlsString(
+datumDesTages
+);
+
+
+const button =
+document.createElement(
+"button"
+);
+
+
+button.className =
+"kalender-tag";
+
+
+button.textContent =
+tag;
+
+
+if (
+datumString ===
+datumAlsString(heute)
+) {
+
+button.classList.add(
+"heute"
+);
+
+}
+
+
+const eintraegeAnDiesemTag =
+alleEintraege.filter(
+function(eintrag) {
+
+return (
+eintrag.datum ===
+datumString
+);
+
+}
+);
+
+
+if (
+eintraegeAnDiesemTag.length > 0
+) {
+
+button.classList.add(
+"hat-eintrag"
+);
+
+
+const symbol =
+document.createElement(
+"span"
+);
+
+
+symbol.className =
+"kalender-symbol";
+
+
+symbol.textContent =
+"🌱 " +
+eintraegeAnDiesemTag.length;
+
+
+button.appendChild(
+symbol
+);
+
+}
+
+
+button.onclick =
+function() {
+
+ausgewaehltesDatum =
+datumString;
+
+
+eintraegeAnzeigen(
+datumString,
+"kalender"
+);
+
+};
+
+
+kalender.appendChild(
+button
+);
+
+}
+
+}
+
+
+function monatAendern(
+richtung
+) {
+
+kalenderMonat +=
+richtung;
+
+
+if (kalenderMonat < 0) {
+
+kalenderMonat = 11;
+
+kalenderJahr--;
+
+}
+
+
+if (kalenderMonat > 11) {
+
+kalenderMonat = 0;
+
+kalenderJahr++;
+
+}
+
+
+kalenderAnzeigen();
+
+}
+
+
+/* ==================================================
+SUCHE
+================================================== */
+
+function sucheEintraege() {
+
+const suchbegriff =
+document
+.getElementById("suchfeld")
+.value
+.trim()
+.toLowerCase();
+
+
+const container =
+document.getElementById(
+"suchErgebnisse"
+);
+
+
+container.innerHTML = "";
+
+
+if (suchbegriff === "") {
+
+container.innerHTML =
+'<div class="leer">Gib einen Begriff ein, um deine Einträge zu durchsuchen.</div>';
+
+return;
+
+}
+
+
+const ergebnisse =
+alleEintraege.filter(
+function(eintrag) {
+
+return (
+eintrag.text
+.toLowerCase()
+.includes(
+suchbegriff
+)
+);
+
+}
+).sort(
+function(a, b) {
+
+return b.id - a.id;
+
+}
+);
+
+
+if (ergebnisse.length === 0) {
+
+container.innerHTML =
+'<div class="leer">Kein passender Eintrag gefunden. 🌱</div>';
+
+return;
+
+}
+
+
+ergebnisse.forEach(
+function(eintrag) {
+
+const box =
+document.createElement(
+"div"
+);
+
+
+box.className =
+"such-ergebnis";
+
+
+box.onclick =
+function() {
+
+ausgewaehltesDatum =
+eintrag.datum;
+
+
+const teile =
+eintrag.datum.split("-");
+
+
+kalenderJahr =
+Number(teile[0]);
+
+
+kalenderMonat =
+Number(teile[1]) - 1;
+
+
+seiteWechseln(
+"kalender",
+document.querySelectorAll(
+".nav-button"
+)[1]
+);
+
+
+kalenderAnzeigen();
+
+
+eintraegeAnzeigen(
+eintrag.datum,
+"kalender"
+);
+
+};
+
+
+const datum =
+document.createElement(
+"div"
+);
+
+
+datum.className =
+"such-datum";
+
+
+const teile =
+eintrag.datum.split("-");
+
+
+const datumObjekt =
+new Date(
+Number(teile[0]),
+Number(teile[1]) - 1,
+Number(teile[2])
+);
+
+
+datum.textContent =
+datumAnzeigen(
+datumObjekt
+);
+
+
+const text =
+document.createElement(
+"div"
+);
+
+
+text.textContent =
+eintrag.text;
+
+
+box.appendChild(
+datum
+);
+
+
+box.appendChild(
+text
+);
+
+
+if (
+eintrag.emojis &&
+eintrag.emojis.length > 0
+) {
+
+const emoji =
+document.createElement(
+"div"
+);
+
+
+emoji.style.marginTop =
+"8px";
+
+
+emoji.textContent =
+eintrag.emojis.join(" ");
+
+
+box.appendChild(
+emoji
+);
+
+}
+
+
+container.appendChild(
+box
+);
+
+}
+);
+
+}
+
+
+/* ==================================================
+DARK MODE
+================================================== */
+
+function darkModeUmschalten() {
+
+document.body.classList.toggle(
+"dark"
+);
+
+
+const aktiv =
+document.body.classList.contains(
+"dark"
+);
+
+
+localStorage.setItem(
+"darkMode",
+aktiv
+? "an"
+: "aus"
+);
+
+
+document.getElementById(
+"darkModeButton"
+).textContent =
+aktiv
+? "An"
+: "Aus";
+
+}
+
+
+function darkModeLaden() {
+
+const aktiv =
+localStorage.getItem(
+"darkMode"
+) === "an";
+
+
+if (aktiv) {
+
+document.body.classList.add(
+"dark"
+);
+
+}
+
+
+document.getElementById(
+"darkModeButton"
+).textContent =
+aktiv
+? "An"
+: "Aus";
+
+}
+
+
+/* ==================================================
+BACKUP EXPORT
+================================================== */
+
+function backupErstellen() {
+
+const backup = {
+
+version: 1,
+
+erstelltAm:
+new Date().toISOString(),
+
+eintraege:
+alleEintraege
+
+};
+
+
+const daten =
+JSON.stringify(
+backup,
+null,
+2
+);
+
+
+const blob =
+new Blob(
+[daten],
+{
+type:
+"application/json"
+}
+);
+
+
+const url =
+URL.createObjectURL(
+blob
+);
+
+
+const link =
+document.createElement(
+"a"
+);
+
+
+const datum =
+datumAlsString(
+new Date()
+);
+
+
+link.href = url;
+
+link.download =
+"Dankbarkeitstagebuch-Backup-" +
+datum +
+".json";
+
+
+link.click();
+
+
+URL.revokeObjectURL(
+url
+);
+
+}
+
+
+/* ==================================================
+BACKUP IMPORT
+================================================== */
+
+function backupImportOeffnen() {
+
+document
+.getElementById(
+"backupDatei"
+)
+.click();
+
+}
+
+
+function backupImportieren(
+event
+) {
+
+const datei =
+event.target.files[0];
+
+
+if (!datei) {
+
+return;
+
+}
+
+
+const reader =
+new FileReader();
+
+
+reader.onload =
+function(e) {
+
+try {
+
+const backup =
+JSON.parse(
+e.target.result
+);
+
+
+if (
+!backup.eintraege ||
+!Array.isArray(
+backup.eintraege
+)
+) {
+
+throw new Error(
+"Ungültiges Backup"
+);
+
+}
+
+
+const bestaetigung =
+confirm(
+"Das Wiederherstellen ersetzt deine aktuell gespeicherten Einträge. Möchtest du fortfahren?"
+);
+
+
+if (!bestaetigung) {
+
+return;
+
+}
+
+
+alleEintraege =
+backup.eintraege;
+
+
+datenSpeichern();
+
+
+heutigeEintraegeAnzeigen();
+
+kalenderAnzeigen();
+
+alert(
+"Backup erfolgreich wiederhergestellt. 🌱"
+);
+
+}
+
+catch {
+
+alert(
+"Dieses Backup konnte nicht gelesen werden."
+);
+
+}
+
+};
+
+
+reader.readAsText(
+datei
+);
+
+
+event.target.value = "";
+
+}
+
+
+/* ==================================================
+PIN
+================================================== */
+
+function pinEinstellungen() {
+
+document
+.getElementById(
+"pinModal"
+)
+.classList.add(
+"aktiv"
+);
+
+
+document
+.getElementById(
+"neuePin"
+)
+.value = "";
+
+
+document
+.getElementById(
+"pinFehler"
+)
+.style.display =
+"none";
+
+}
+
+
+function pinModalSchliessen() {
+
+document
+.getElementById(
+"pinModal"
+)
+.classList.remove(
+"aktiv"
+);
+
+}
+
+
+function pinSpeichern() {
+
+const pin =
+document
+.getElementById(
+"neuePin"
+)
+.value;
+
+
+if (
+!/^\d{4}$/.test(pin)
+) {
+
+document
+.getElementById(
+"pinFehler"
+)
+.style.display =
+"block";
+
+return;
+
+}
+
+
+localStorage.setItem(
+"tagebuchPin",
+pin
+);
+
+
+pinModalSchliessen();
+
+
+document.getElementById(
+"pinButton"
+).textContent =
+"Ändern";
+
+
+alert(
+"PIN wurde eingerichtet. 🔒"
+);
+
+}
+
+
+function pinStatusLaden() {
+
+const vorhanden =
+!!localStorage.getItem(
+"tagebuchPin"
+);
+
+
+document.getElementById(
+"pinButton"
+).textContent =
+vorhanden
+? "Ändern"
+: "Einrichten";
+
+}
+
+
+function sperrbildschirmPruefen() {
+
+const pin =
+localStorage.getItem(
+"tagebuchPin"
+);
+
+
+if (pin) {
+
+document
+.getElementById(
+"sperrbildschirm"
+)
+.classList.add(
+"aktiv"
+);
+
+}
+
+}
+
+
+function entsperren() {
+
+const eingegebenePin =
+document
+.getElementById(
+"pinEingabe"
+)
+.value;
+
+
+const richtigePin =
+localStorage.getItem(
+"tagebuchPin"
+);
+
+
+if (
+eingegebenePin ===
+richtigePin
+) {
+
+document
+.getElementById(
+"sperrbildschirm"
+)
+.classList.remove(
+"aktiv"
+);
+
+
+document
+.getElementById(
+"pinEingabe"
+)
+.value = "";
+
+
+document
+.getElementById(
+"entsperrFehler"
+)
+.style.display =
+"none";
+
+} else {
+
+document
+.getElementById(
+"entsperrFehler"
+)
+.style.display =
+"block";
+
+}
+
+}
+
+
+/* ==================================================
+START
+================================================== */
+
+darkModeLaden();
+
+pinStatusLaden();
+
+heutigeEintraegeAnzeigen();
+
+kalenderAnzeigen();
+
+sperrbildschirmPruefen();
+
+</script>
+
+<script>
+if ("serviceWorker" in navigator) {
+window.addEventListener("load", () => {
+navigator.serviceWorker.register("./service-worker.js");
+});
+}
+</script>
+
+</body>
+</html>
